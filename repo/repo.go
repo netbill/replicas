@@ -1,11 +1,11 @@
-package replicas
+package repo
 
 import (
 	"context"
 	"database/sql"
 
 	"github.com/netbill/pgx"
-	"github.com/netbill/replicas/pgdb"
+	"github.com/netbill/replicas/repo/pgdb"
 )
 
 type Service struct {
