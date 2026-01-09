@@ -16,8 +16,8 @@ import (
 
 const OrganizationRoleTable = "organization_roles"
 
-const OrganizationRoleColumns = "id, organization_id, head, rank, name, description, color, created_at, updated_at"
-const OrganizationRoleColumnsR = "r.id, r.organization_id, r.head, r.rank, r.name, r.description, r.color, r.created_at, r.updated_at"
+const OrganizationRoleColumns = "id, organization_id, head, rank, name, color, created_at, updated_at"
+const OrganizationRoleColumnsR = "r.id, r.organization_id, r.head, r.rank, r.name, r.color, r.created_at, r.updated_at"
 
 type OrganizationRole struct {
 	ID             uuid.UUID `json:"id"`
@@ -25,7 +25,6 @@ type OrganizationRole struct {
 	Head           bool      `json:"head"`
 	Rank           uint      `json:"rank"`
 	Name           string    `json:"name"`
-	Description    string    `json:"description"`
 	Color          string    `json:"color"`
 
 	CreatedAt time.Time `json:"created_at"`
@@ -39,7 +38,6 @@ func (r *OrganizationRole) scan(row sq.RowScanner) error {
 		&r.Head,
 		&r.Rank,
 		&r.Name,
-		&r.Description,
 		&r.Color,
 		&r.CreatedAt,
 		&r.UpdatedAt,
@@ -77,7 +75,6 @@ type InsertRoleParams struct {
 	Head           bool      `json:"head"`
 	Rank           uint      `json:"rank"`
 	Name           string    `json:"name"`
-	Description    string    `json:"description"`
 	Color          string    `json:"color"`
 }
 
@@ -93,11 +90,11 @@ func (q OrgRolesQ) Insert(ctx context.Context, data InsertRoleParams) (Organizat
 			RETURNING 1
 		),
 		ins AS (
-			INSERT INTO organization_roles (organization_id, head, rank, name, description, color)
-			VALUES ($1, $3, $2, $4, $5, $6)
-			RETURNING id, organization_id, head, rank, name, description, color, created_at, updated_at
+			INSERT INTO organization_roles (organization_id, head, rank, name, color)
+			VALUES ($1, $3, $2, $4, $5)
+			RETURNING id, organization_id, head, rank, name, color, created_at, updated_at
 		)
-		SELECT id, organization_id, head, rank, name, description, color, created_at, updated_at
+		SELECT id, organization_id, head, rank, name, color, created_at, updated_at
 		FROM ins;
 	`
 
@@ -106,7 +103,6 @@ func (q OrgRolesQ) Insert(ctx context.Context, data InsertRoleParams) (Organizat
 		data.Rank,
 		data.Head,
 		data.Name,
-		data.Description,
 		data.Color,
 	}
 
@@ -231,11 +227,6 @@ func (q OrgRolesQ) UpdateMany(ctx context.Context) (int64, error) {
 
 func (q OrgRolesQ) UpdateName(name string) OrgRolesQ {
 	q.updater = q.updater.Set("name", name)
-	return q
-}
-
-func (q OrgRolesQ) UpdateDescription(description string) OrgRolesQ {
-	q.updater = q.updater.Set("description", description)
 	return q
 }
 
@@ -400,9 +391,9 @@ func (q OrgRolesQ) UpdateRoleRank(ctx context.Context, roleID uuid.UUID, newRank
 				END,
 				updated_at = now()
 			WHERE organization_id = $4
-			RETURNING id, organization_id, head, rank, name, description, color, created_at, updated_at
+			RETURNING id, organization_id, head, rank, name, color, created_at, updated_at
 		)
-		SELECT id, organization_id, head, rank, name, description, color, created_at, updated_at
+		SELECT id, organization_id, head, rank, name, color, created_at, updated_at
 		FROM upd
 		WHERE id = $1
 	`
@@ -504,7 +495,7 @@ func (q OrgRolesQ) UpdateRolesRanks(
 		) v
 		WHERE r.id = v.id
 		  AND r.organization_id = $3
-		RETURNING r.id, r.organization_id, r.head, r.rank, r.name, r.description, r.color, r.created_at, r.updated_at
+		RETURNING r.id, r.organization_id, r.head, r.rank, r.name, r.color, r.created_at, r.updated_at
 	`
 
 	ids := make([]string, len(changed))

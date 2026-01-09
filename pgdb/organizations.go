@@ -14,14 +14,14 @@ import (
 )
 
 const OrganizationTable = "organizations"
-const OrganizationColumns = "id, status, name, icon, max_roles, created_at, updated_at"
+const OrganizationColumns = "id, status, name, icon, created_at, updated_at"
 
 type Organization struct {
 	ID       uuid.UUID `json:"id"`
 	Status   string    `json:"status"`
+	Verified bool      `json:"verified"`
 	Name     string    `json:"name"`
 	Icon     *string   `json:"icon"`
-	MaxRoles uint      `json:"max_roles"`
 
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
@@ -33,7 +33,6 @@ func (a *Organization) scan(row sq.RowScanner) error {
 		&a.Status,
 		&a.Name,
 		&a.Icon,
-		&a.MaxRoles,
 		&a.CreatedAt,
 		&a.UpdatedAt,
 	)
@@ -244,11 +243,6 @@ func (q OrganizationsQ) UpdateIcon(icon string) OrganizationsQ {
 
 func (q OrganizationsQ) UpdateStatus(status string) OrganizationsQ {
 	q.updater = q.updater.Set("status", status)
-	return q
-}
-
-func (q OrganizationsQ) UpdateMaxRoles(maxRoles uint) OrganizationsQ {
-	q.updater = q.updater.Set("max_roles", maxRoles)
 	return q
 }
 
